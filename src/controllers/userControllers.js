@@ -29,27 +29,36 @@ const getUser = async (req, res) => {
   const { email, password } = req.body
 
   const user = await User.findOne({ email });
-
   /**clg
    * verify password method 1
    */
   // const userPassword = user[0].password;
   // const correctPassword = await bcrypt.compare(password, userPassword);
-
+ 
 
   if (user) {
     const correctPassword = await user.passwordMatch(password)
     if (correctPassword) {
       req.session.userId = user._id
+      
       res.redirect('/tasks')
     }
+    req.flash('errorMessage', 'User or password incorrect')
     res.redirect('/login')
   } else {
+    req.flash('errorMessage','User or password incorrect')
     res.redirect('/login')
   }
 
 
 }
+
+
+const logoutUser = (req, res) => {
+  req.session.userId = null
+  res.redirect('/')
+}
+
 
 /**
  * encrypt password method 1
@@ -61,4 +70,4 @@ const getUser = async (req, res) => {
 // }
 
 
-module.exports = { createUser, loginUser, signupUser, getUser }
+module.exports = { createUser, loginUser, signupUser, getUser, logoutUser }
